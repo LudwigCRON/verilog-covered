@@ -567,12 +567,12 @@ module_parameter_port_list_opt
   ;
 
 module_parameter_port_list
-  : K_parameter signed_opt range_opt parameter_assign
+  : K_parameter signed_opt type_opt range_opt parameter_assign
     {
       curr_prange.clear = TRUE;
     }
   | module_parameter_port_list ',' parameter_assign
-  | module_parameter_port_list ',' K_parameter signed_opt range_opt parameter_assign
+  | module_parameter_port_list ',' K_parameter signed_opt type_opt range_opt parameter_assign
     {
       curr_prange.clear = TRUE;
     }
@@ -5247,6 +5247,14 @@ unsigned_opt
   : K_unsigned { curr_signed = FALSE; }
   | K_signed   { curr_signed = TRUE;  }
   |            { curr_signed = TRUE;  }
+  ;
+
+type_opt
+  : K_integer
+  | K_real
+  | K_realtime
+  | K_time
+  | 
   ;
 
   /*
