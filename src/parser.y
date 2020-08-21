@@ -567,12 +567,12 @@ module_parameter_port_list_opt
   ;
 
 module_parameter_port_list
-  : K_parameter signed_opt type_opt range_opt parameter_assign
+  : K_parameter signed_opt range_or_type_opt parameter_assign
     {
       curr_prange.clear = TRUE;
     }
   | module_parameter_port_list ',' parameter_assign
-  | module_parameter_port_list ',' K_parameter signed_opt type_opt range_opt parameter_assign
+  | module_parameter_port_list ',' K_parameter signed_opt range_or_type_opt parameter_assign
     {
       curr_prange.clear = TRUE;
     }
@@ -4815,6 +4815,21 @@ delay1
         $$ = NULL;
       }
     }
+  | '#' '(' delay_value_simple ')'
+    {
+      if( (ignore_mode == 0) && ($3 != NULL) ) {
+        Try {
+          $$ = db_create_expression( $3, NULL, EXP_OP_DELAY, lhs_mode, @1.first_line, @1.ppfline, @4.pplline, @1.first_column, (@4.last_column - 1), NULL, in_static_expr );
+        } Catch_anonymous {
+          expression_dealloc( $3, FALSE );
+          error_count++;
+          $$ = NULL;
+        }
+      } else {
+        expression_dealloc( $3, FALSE );
+        $$ = NULL;
+      }
+    }
   | '#' '(' delay_value ')'
     {
       if( (ignore_mode == 0) && ($3 != NULL) ) {
@@ -4845,6 +4860,21 @@ delay3
         }
       } else {
         expression_dealloc( $2, FALSE );
+        $$ = NULL;
+      }
+    }
+  | '#' '(' delay_value_simple ')'
+    {
+      if( (ignore_mode == 0) && ($3 != NULL) ) {
+        Try {
+          $$ = db_create_expression( $3, NULL, EXP_OP_DELAY, lhs_mode, @1.first_line, @1.ppfline, @4.pplline, @1.first_column, (@4.last_column - 1), NULL, in_static_expr );
+        } Catch_anonymous {
+          expression_dealloc( $3, FALSE );
+          error_count++;
+          $$ = NULL;
+        }
+      } else {
+        expression_dealloc( $3, FALSE );
         $$ = NULL;
       }
     }
@@ -5247,14 +5277,6 @@ unsigned_opt
   : K_unsigned { curr_signed = FALSE; }
   | K_signed   { curr_signed = TRUE;  }
   |            { curr_signed = TRUE;  }
-  ;
-
-type_opt
-  : K_integer
-  | K_real
-  | K_realtime
-  | K_time
-  | 
   ;
 
   /*
@@ -5895,7 +5917,7 @@ function_item
   ;
 
 parameter_assign_decl
-  : signed_opt range_opt parameter_assign_list
+  : signed_opt range_or_type_opt parameter_assign_list
   ;
 
 parameter_assign_list
@@ -5925,7 +5947,7 @@ parameter_assign
   ;
 
 localparam_assign_decl
-  : signed_opt range_opt localparam_assign_list
+  : signed_opt range_or_type_opt localparam_assign_list
   ;
 
 localparam_assign_list
